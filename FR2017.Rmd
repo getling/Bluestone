@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = FALSE,
                       cache = TRUE)
 
 # Scientific notation defaults
-options(scipen=1,digits=2)
+options(scipen=1,digits=4)
 
 require(tidyverse) || {install.packages("tidyverse"); require(tidyverse)}
 #require(scales) || {install.packages("scales"); require(scales)}
@@ -72,19 +72,32 @@ frs$votes <- parse_number(gsub(" .*$","",frs$votes)) * 5
 
 ```
 
-```{r univariate}
+```{r univariate, eval = FALSE}
 require(DescTools) || {install.packages("DescTools"); require(DescTools)}
 Desc(frs)
 ```
 
+# Donation statistics
+Average donation amount $67
+```{r amount1, echo = TRUE}
+mean(frs$Amount)
+```
+Median donation amount $40
+```{r amount2, echo = TRUE}
+median(frs$Amount)
+```
+
+# Beard Vote engagement
 41% of people by dollars contributed were engaged by the beard vote.
-```{r beardvote1}
+```{r beardvoteload, message = FALSE}
 library(scales)
+```
+```{r beardvote1, echo = TRUE}
 # Sum of non NA votes divided by sum of Amount
 percent(sum(frs$votes, na.rm=TRUE)/sum(frs$Amount))
 ```
 37% of people by dollars contributed were engaged by the beard vote.
-```{r beardvote2}
+```{r beardvote2, echo = TRUE}
 # Non NA votes divided by total rows
 percent(sum(!is.na(frs$votes))/nrow(frs))
 ```

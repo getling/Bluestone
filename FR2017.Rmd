@@ -58,7 +58,33 @@ frs$DateTime <- parse_datetime(frs$DateTime,
 # Fix Fee percentage values
 frs$Fee <- ifelse(frs$Fee >= 1, frs$Fee * .01, frs$Fee)
 
-# Split Perk into Perk and votes and convert votes to number
+# Split Perk into Perk and votes
 frs <- frs %>% separate(Perk,c("Perk", "votes"), " [+]")
-frs$votes <- parse_number(gsub(" .*$","",frs$votes))
+# Convert Perk to ordered factor
+frs$Perk <- factor(frs$Perk, levels = c("The Bow of the Head",
+                                  "The Acknowledge",
+                                  "The Call And Answer",
+                                  "The Beacon of Hope",
+                                  "The Shining Light"),
+                      ordered = TRUE)
+# Converting votes to number on currency equivalent scale
+frs$votes <- parse_number(gsub(" .*$","",frs$votes)) * 5
+
+```
+
+```{r univariate}
+require(DescTools) || {install.packages("DescTools"); require(DescTools)}
+Desc(frs)
+```
+
+41% of people by dollars contributed were engaged by the beard vote.
+```{r beardvote1}
+library(scales)
+# Sum of non NA votes divided by sum of Amount
+percent(sum(frs$votes, na.rm=TRUE)/sum(frs$Amount))
+```
+37% of people by dollars contributed were engaged by the beard vote.
+```{r beardvote2}
+# Non NA votes divided by total rows
+percent(sum(!is.na(frs$votes))/nrow(frs))
 ```

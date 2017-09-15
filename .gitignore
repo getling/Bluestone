@@ -38,3 +38,7 @@ vignettes/*.pdf
 
 # Input files
 input/
+
+# Output files
+FR2017.pdf
+FR2017_files/

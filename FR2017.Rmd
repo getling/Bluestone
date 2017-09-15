@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = FALSE,
 options(scipen=1,digits=2)
 
 require(tidyverse) || {install.packages("tidyverse"); require(tidyverse)}
+#require(scales) || {install.packages("scales"); require(scales)}
 
 # Set base theme
 theme_set(theme_minimal())
@@ -28,10 +29,10 @@ mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
 ```
 
 ```{r load_data, message = FALSE}
+# Load frame
 frs <- read_csv("input/initial-fundraise.csv",
          col_types =cols(
            `Order No.` = col_integer(),
-           #`Funding Date` = col_datetime("%D %R"),
            `Funding Date` = col_character(),
            `Payment Method` = col_character(),
            Appearance = col_factor(levels = NULL),
@@ -39,7 +40,25 @@ frs <- read_csv("input/initial-fundraise.csv",
            Amount = col_number(),
            `Platform Fee` = col_number(),
            `Perk ID` = col_integer(),
-           Perk = col_character()))
+           Perk = col_character())) 
 
+# Rename Columns
+frs <- frs %>%
+  rename(Order = `Order No.`,
+         DateTime = `Funding Date`,
+         PaymentType = `Payment Method`,
+         Fee = `Platform Fee`,
+         PerkID = `Perk ID`)
 
+# Convert DateTime field to POSIXct format
+frs$DateTime <- parse_datetime(frs$DateTime, 
+                               "%m/%d/%Y %H:%M", 
+                               locale = locale(tz = "US/Pacific"))
+
+# Fix Fee percentage values
+frs$Fee <- ifelse(frs$Fee >= 1, frs$Fee * .01, frs$Fee)
+
+# Split Perk into Perk and votes and convert votes to number
+frs <- frs %>% separate(Perk,c("Perk", "votes"), " [+]")
+frs$votes <- parse_number(gsub(" .*$","",frs$votes))
 ```

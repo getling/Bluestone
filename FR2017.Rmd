@@ -26,3 +26,20 @@ mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
   .data
 }
 ```
+
+```{r load_data, message = FALSE}
+frs <- read_csv("input/initial-fundraise.csv",
+         col_types =cols(
+           `Order No.` = col_integer(),
+           #`Funding Date` = col_datetime("%D %R"),
+           `Funding Date` = col_character(),
+           `Payment Method` = col_character(),
+           Appearance = col_factor(levels = NULL),
+           Name = col_character(),
+           Amount = col_number(),
+           `Platform Fee` = col_number(),
+           `Perk ID` = col_integer(),
+           Perk = col_character()))
+
+
+```

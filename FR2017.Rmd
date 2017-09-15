@@ -1,0 +1,28 @@
+---
+title: "FR2017"
+author: "Greg Etling"
+date: "9/15/2017"
+output: pdf_document
+---
+```{r setup, include = FALSE}
+# Knitr defaults
+knitr::opts_chunk$set(echo = FALSE,
+                      fig.align = 'center', 
+                      autodep = TRUE,
+                      cache = TRUE)
+
+# Scientific notation defaults
+options(scipen=1,digits=2)
+
+require(tidyverse) || {install.packages("tidyverse"); require(tidyverse)}
+
+# Set base theme
+theme_set(theme_minimal())
+
+# Functions
+mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
+  condition <- eval(substitute(condition), .data, envir)
+  .data[condition, ] <- .data[condition, ] %>% mutate(...)
+  .data
+}
+```

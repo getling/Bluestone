@@ -182,6 +182,7 @@ There appear to be a couple major clusters of donations, at the beginning and ar
 ggplot(frs, 
        aes(x = DateTime,
            y = Amount)) +
+  geom_point() +
   geom_line() +
   geom_density_2d() + 
   theme_pander() +
@@ -224,5 +225,5 @@ ggplot(frs,
 # Anonymity - only 8 Anons, slice that a bit more to look for skew
 # Would love to add time series of marketing efforts (FB posts, emails, tweets, etc.)
 #  Could better pinpoint what may have driven donations
-
+# Knn on Donations over time? Groups of donations by multiple dimensions?
 

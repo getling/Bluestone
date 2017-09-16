@@ -1,5 +1,5 @@
 ---
-title: "FR2017"
+title: "Bluestone Project Donation Report"
 author: "Greg Etling"
 date: "9/15/2017"
 output: pdf_document
@@ -16,6 +16,8 @@ options(scipen=1,digits=4)
 
 require(tidyverse) || {install.packages("tidyverse"); require(tidyverse)}
 #require(scales) || {install.packages("scales"); require(scales)}
+require(ggthemes) || {install.packages("ggthemes"); require(ggthemes)}
+require(RColorBrewer) || {install.packages("RColorBrewer"); require(RColorBrewer)}
 
 # Set base theme
 theme_set(theme_minimal())
@@ -34,7 +36,7 @@ frs <- read_csv("input/initial-fundraise.csv",
          col_types =cols(
            `Order No.` = col_integer(),
            `Funding Date` = col_character(),
-           `Payment Method` = col_character(),
+           `Payment Method` = col_factor(levels = NULL),
            Appearance = col_factor(levels = NULL),
            Name = col_character(),
            Amount = col_number(),
@@ -77,7 +79,7 @@ require(DescTools) || {install.packages("DescTools"); require(DescTools)}
 Desc(frs)
 ```
 
-# Donation statistics
+# Basic donation statistics
 Average donation amount $67
 ```{r amount1, echo = TRUE}
 mean(frs$Amount)
@@ -99,5 +101,104 @@ percent(sum(frs$votes, na.rm=TRUE)/sum(frs$Amount))
 37% of people by dollars contributed were engaged by the beard vote.
 ```{r beardvote2, echo = TRUE}
 # Non NA votes divided by total rows
-percent(sum(!is.na(frs$votes))/nrow(frs))
+percent(sum(!is.na(frs$votes)) / nrow(frs))
 ```
+Biggest engagement in the beard vote was at the low end and the $250 level:
+```{r beardgraph}
+ggplot(frs, 
+       aes(x = Amount,
+           fill = !is.na(votes))) +
+  geom_histogram(binwidth = 50) +
+  coord_flip() +
+  theme_pander() +
+  theme(axis.ticks.x = element_blank()) + 
+  labs(x = "Donation Amount",
+       title = "Donations with Beard Vote Engagement")
+```
+
+# Perk engagement
+Showing the distribution of donations, colored if they selected a perk:
+```{r donationperkgraph}
+ggplot(frs, 
+       aes(x = Amount,
+           fill = Perk)) +
+  geom_histogram(binwidth = 50) +
+  coord_flip() +
+  theme_pander() +
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank()) + 
+  labs(x = "Donation Amount",
+       title = "Donations with Selected Perks")
+```
+Interesting to note in this - perks had lower uptake at lower levels, but definitely had uptake and value in driving the midrange with "The Shining Light" at the $250 level.
+
+Unsurprisingly the top level ($500) is an outlier both in amount and in not being perk-driven.
+
+# Anonymity
+There were only 8 Anonymous donors (8.25%):
+```{r anon}
+sum(frs$Appearance == "Anonymous")
+percent(sum(frs$Appearance == "Anonymous") / nrow(frs))
+```
+
+Anonymous donors gave larger amounts, but given the small sample it isn't determinative:
+```{r anonaov, echo = TRUE}
+summary(aov(Amount ~ Appearance,
+            data = frs))
+```
+
+```{r anonhistgraph}
+ggplot(frs, 
+       aes(x = Amount,
+           fill = Appearance)) +
+  geom_histogram(binwidth = 50) +
+  coord_flip() +
+  theme_pander() +
+  theme(axis.ticks.x = element_blank()) + 
+  labs(x = "Donation Amount",
+       title = "Donations with Anonymity")
+```
+
+Even though it isn't statistically significant given the sample size, the average is higher:
+```{r donationanongraph}
+ggplot(frs, 
+       aes(x = Appearance,
+           y = Amount,
+           fill = Appearance)) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_flip(ylim = c(0, 200)) +
+  theme_pander() + 
+  theme(legend.position = "none",
+        axis.ticks.y = element_blank()) +
+  labs(x = "Anonymous Donor?",
+       y = "Donation Amount",
+       title = "Average Donation Amount by Anonymity")
+```
+
+# Time series - donations over time
+
+There appear to be a couple major clusters of donations, at the beginning and around the start of August:
+```{r tsdonations}
+ggplot(frs, 
+       aes(x = DateTime,
+           y = Amount)) +
+  geom_line() +
+  geom_density_2d() + 
+  theme_pander() +
+  theme(axis.ticks.x = element_blank()) + 
+  scale_x_datetime(date_labels = "%b %d",
+                   date_breaks = "1 week") +
+  labs(x = "Date",
+       y = "Donation Amount",
+       title = "Donations by date")
+
+
+```
+
+# TODO
+# Couples - split the 'Name' on '&' and create a numPersons feature
+# Anonymity - only 8 Anons, slice that a bit more to look for skew
+# Would love to add time series of marketing efforts (FB posts, emails, tweets, etc.)
+#  Could better pinpoint what may have driven donations
+
+
